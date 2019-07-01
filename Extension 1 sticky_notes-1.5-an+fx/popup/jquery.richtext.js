@@ -663,6 +663,613 @@
             }
 
         });
+      // Saving changes from textarea to editor
+        $(document).on("input change blur", ".richText-initial", function() {
+            if(settings.useSingleQuotes === true) {
+                $(this).val(changeAttributeQuotes($(this).val()));
+            }
+            var editorID = $(this).siblings('.richText-editor').attr("id");
+            updateEditor(editorID);
+            doSave(editorID);
+            updateMaxLength(editorID);
+        });
+
+        // Save selection seperately (mainly needed for Safari)
+        $(document).on("dblclick mouseup", ".richText-editor", function() {
+            var editorID = $(this).attr("id");
+            doSave(editorID);
+        });
+
+        // embedding video
+        $(document).on("click", "#richText-Video button.btn", function(event) {
+            event.preventDefault();
+            var $button = $(this);
+            var $form = $button.parent('.richText-form-item').parent('.richText-form');
+            if($form.attr("data-editor") === editorID) {
+                // only for the currently selected editor
+                var url = $form.find('input#videoURL').val();
+                var size = $form.find('select#size').val();
+
+                if(!url) {
+                    // no url set
+                    $form.prepend($('<div />', {style: 'color:red;display:none;', class: 'form-item is-error', text: settings.translations.pleaseEnterURL}));
+                    $form.children('.form-item.is-error').slideDown();
+                    setTimeout(function() {
+                        $form.children('.form-item.is-error').slideUp(function () {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                } else {
+                    // write html in editor
+                    var html = '';
+                    html = getVideoCode(url, size);
+                    if(!html) {
+                        $form.prepend($('<div />', {style: 'color:red;display:none;', class: 'form-item is-error', text: settings.translations.videoURLnotSupported}));
+                        $form.children('.form-item.is-error').slideDown();
+                        setTimeout(function() {
+                            $form.children('.form-item.is-error').slideUp(function () {
+                                $(this).remove();
+                            });
+                        }, 5000);
+                    } else {
+                        if(settings.useSingleQuotes === true) {
+
+                        } else {
+
+                        }
+                        restoreSelection(editorID, true);
+                        pasteHTMLAtCaret(html);
+                        updateTextarea();
+                        // reset input values
+                        $form.find('input#videoURL').val('');
+                        $('.richText-toolbar li.is-selected').removeClass("is-selected");
+                    }
+                }
+            }
+        });
+
+        // Resize images
+        $(document).on('mousedown', function(e) {
+            var $target = $(e.target);
+            if(!$target.hasClass('richText-list') && $target.parents('.richText-list').length === 0) {
+                // remove context menu
+                $('.richText-list.list-rightclick').remove();
+                if(!$target.hasClass('richText-form') && $target.parents('.richText-form').length === 0) {
+                    $('.richText-editNode').each(function () {
+                        var $this = $(this);
+                        $this.removeClass('richText-editNode');
+                        if ($this.attr('class') === '') {
+                            $this.removeAttr('class');
+                        }
+                    });
+                }
+            }
+            if($target.prop("tagName") === "IMG" && $target.parents("#" + editorID)) {
+                startX = e.pageX;
+                startY = e.pageY;
+                startW = $target.innerWidth();
+                startH = $target.innerHeight();
+
+                var left = $target.offset().left;
+                var right = $target.offset().left + $target.innerWidth();
+                var bottom = $target.offset().top + $target.innerHeight();
+                var top = $target.offset().top;
+                var resize = false;
+                $target.css({'cursor' : 'default'});
+
+                if(startY <= bottom && startY >= bottom-20 && startX >= right-20 && startX <= right) {
+                    // bottom right corner
+                    $resizeImage = $target;
+                    $resizeImage.css({'cursor' : 'nwse-resize'});
+                    resize = true;
+                }
+
+                if((resize === true || $resizeImage) && !$resizeImage.data("width")) {
+                    // set initial image size and prevent dragging image while resizing
+                    $resizeImage.data("width", $target.parents("#" + editorID).innerWidth());
+                    $resizeImage.data("height", $target.parents("#" + editorID).innerHeight()*3);
+                    e.preventDefault();
+                } else if(resize === true || $resizeImage) {
+                    // resizing active, prevent other events
+                    e.preventDefault();
+                } else {
+                    // resizing disabled, allow dragging image
+                    $resizeImage = null;
+                }
+                
+            }
+        });
+        $(document)
+            .mouseup(function(){
+                if($resizeImage) {
+                    $resizeImage.css({'cursor' : 'default'});
+                }
+                $resizeImage = null;
+            })
+            .mousemove(function(e){
+                if($resizeImage!==null){
+                    var maxWidth = $resizeImage.data('width');
+                    var currentWidth = $resizeImage.width();
+                    var maxHeight = $resizeImage.data('height');
+                    var currentHeight = $resizeImage.height();
+                    if((startW + e.pageX-startX) <= maxWidth && (startH + e.pageY-startY) <= maxHeight) {
+                        // only resize if new size is smaller than the original image size
+                        $resizeImage.innerWidth (startW + e.pageX-startX); // only resize width to adapt height proportionally
+                        // $box.innerHeight(startH + e.pageY-startY);
+                        updateTextarea();
+                    } else if((startW + e.pageX-startX) <= currentWidth && (startH + e.pageY-startY) <= currentHeight) {
+                        // only resize if new size is smaller than the previous size
+                        $resizeImage.innerWidth (startW + e.pageX-startX); // only resize width to adapt height proportionally
+                        updateTextarea();
+                    }
+                }
+            });
+
+        // adding URL
+        $(document).on("click", "#richText-URL button.btn", function(event) {
+            event.preventDefault();
+            var $button = $(this);
+            var $form = $button.parent('.richText-form-item').parent('.richText-form');
+            if($form.attr("data-editor") === editorID) {
+                // only for currently selected editor
+                var url = $form.find('input#url').val();
+                var text = $form.find('input#urlText').val();
+                var target = $form.find('#openIn').val();
+
+                // set default values
+                if(!target) {
+                    target = '_self';
+                }
+                if(!text) {
+                    text = url;
+                }
+                if(!url) {
+                    // no url set
+                    $form.prepend($('<div />', {style: 'color:red;display:none;', class: 'form-item is-error', text: settings.translations.pleaseEnterURL}));
+                    $form.children('.form-item.is-error').slideDown();
+                    setTimeout(function() {
+                        $form.children('.form-item.is-error').slideUp(function () {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                } else {
+                    // write html in editor
+                    var html = '';
+                    if(settings.useSingleQuotes === true) {
+                        html = "<a href='" + url + "' target='" + target + "'>" + text + "</a>";
+                    } else {
+                        html = '<a href="' + url + '" target="' + target + '">' + text + '</a>';
+                    }
+                    restoreSelection(editorID, false, true);
+
+                    var $editNode = $('.richText-editNode');
+                    if($editNode.length > 0 && $editNode.prop("tagName") === "A") {
+                        $editNode.attr("href", url);
+                        $editNode.attr("target", target);
+                        $editNode.text(text);
+                        $editNode.removeClass('richText-editNode');
+                        if($editNode.attr('class') === '') {
+                            $editNode.removeAttr('class');
+                        }
+                    } else {
+                        pasteHTMLAtCaret(html);
+                    }
+                    // reset input values
+                    $form.find('input#url').val('');
+                    $form.find('input#urlText').val('');
+                    $('.richText-toolbar li.is-selected').removeClass("is-selected");
+                }
+            }
+        });
+
+        // adding image
+        $(document).on("click", "#richText-Image button.btn", function(event) {
+            event.preventDefault();
+            var $button = $(this);
+            var $form = $button.parent('.richText-form-item').parent('.richText-form');
+            if($form.attr("data-editor") === editorID) {
+                // only for currently selected editor
+                var url = $form.find('#imageURL').val();
+                var align = $form.find('select#align').val();
+
+                // set default values
+                if(!align) {
+                    align = 'center';
+                }
+                if(!url) {
+                    // no url set
+                    $form.prepend($('<div />', {style: 'color:red;display:none;', class: 'form-item is-error', text: settings.translations.pleaseSelectImage}));
+                    $form.children('.form-item.is-error').slideDown();
+                    setTimeout(function() {
+                        $form.children('.form-item.is-error').slideUp(function () {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                } else {
+                    // write html in editor
+                    var html = '';
+                    if(settings.useSingleQuotes === true) {
+                        if(align === "center") {
+                            html = "<div style='text-align:center;'><img src='" + url + "'></div>";
+                        } else {
+                            html = "<img src='" + url + "' align='" + align + "'>";
+                        }
+                    } else {
+                        if(align === "center") {
+                            html = '<div style="text-align:center;"><img src="' + url + '"></div>';
+                        } else {
+                            html = '<img src="' + url + '" align="' + align + '">';
+                        }
+                    }
+                    restoreSelection(editorID, true);
+                    var $editNode = $('.richText-editNode');
+                    if($editNode.length > 0 && $editNode.prop("tagName") === "IMG") {
+                        $editNode.attr("src", url);
+                        if($editNode.parent('div').length > 0 && $editNode.parent('div').attr('style') === 'text-align:center;' && align !== 'center') {
+                            $editNode.unwrap('div');
+                            $editNode.attr('align', align);
+                        } else if(($editNode.parent('div').length === 0 || $editNode.parent('div').attr('style') !== 'text-align:center;') && align === 'center' ) {
+                            $editNode.wrap('<div style="text-align:center;"></div>');
+                            $editNode.removeAttr('align');
+                        } else {
+                            $editNode.attr('align', align);
+                        }
+                        $editNode.removeClass('richText-editNode');
+                        if($editNode.attr('class') === '') {
+                            $editNode.removeAttr('class');
+                        }
+                    } else {
+                        pasteHTMLAtCaret(html);
+                    }
+                    // reset input values
+                    $form.find('input#imageURL').val('');
+                    $('.richText-toolbar li.is-selected').removeClass("is-selected");
+                }
+            }
+        });
+
+        // adding file
+        $(document).on("click", "#richText-File button.btn", function(event) {
+            event.preventDefault();
+            var $button = $(this);
+            var $form = $button.parent('.richText-form-item').parent('.richText-form');
+            if($form.attr("data-editor") === editorID) {
+                // only for currently selected editor
+                var url = $form.find('#fileURL').val();
+                var text = $form.find('#fileText').val();
+
+                // set default values
+                if(!text) {
+                    text = url;
+                }
+                if(!url) {
+                    // no url set
+                    $form.prepend($('<div />', {style: 'color:red;display:none;', class: 'form-item is-error', text: settings.translations.pleaseSelectFile}));
+                    $form.children('.form-item.is-error').slideDown();
+                    setTimeout(function() {
+                        $form.children('.form-item.is-error').slideUp(function () {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                } else {
+                    // write html in editor
+                    var html = '';
+                    if(settings.useSingleQuotes === true) {
+                        html = "<a href='" + url + "' target='_blank'>" + text + "</a>";
+                    } else {
+                        html = '<a href="' + url + '" target="_blank">' + text + '</a>';
+                    }
+                    restoreSelection(editorID, true);
+                    pasteHTMLAtCaret(html);
+                    // reset input values
+                    $form.find('input#fileURL').val('');
+                    $form.find('input#fileText').val('');
+                    $('.richText-toolbar li.is-selected').removeClass("is-selected");
+                }
+            }
+        });
+
+
+        // adding table
+        $(document).on("click", "#richText-Table button.btn", function(event) {
+            event.preventDefault();
+            var $button = $(this);
+            var $form = $button.parent('.richText-form-item').parent('.richText-form');
+            if($form.attr("data-editor") === editorID) {
+                // only for currently selected editor
+                var rows = $form.find('input#tableRows').val();
+                var columns = $form.find('input#tableColumns').val();
+
+                // set default values
+                if(!rows || rows <= 0) {
+                    rows = 2;
+                }
+                if(!columns || columns <= 0) {
+                    columns = 2;
+                }
+                
+                // generate table
+                var html = '';
+                if(settings.useSingleQuotes === true) {
+                    html = "<table class='table-1'><tbody>";
+                } else {
+                    html = '<table class="table-1"><tbody>';
+                }
+                for(var i = 1; i <= rows; i++) {
+                    // start new row
+                    html += '<tr>';
+                    for(var n = 1; n <= columns; n++) {
+                        // start new column in row
+                        html += '<td> </td>';
+                    }
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+
+                // write html in editor
+                restoreSelection(editorID, true);
+                pasteHTMLAtCaret(html);
+                // reset input values
+                $form.find('input#tableColumns').val('');
+                $form.find('input#tableRows').val('');
+                $('.richText-toolbar li.is-selected').removeClass("is-selected");
+            }
+        });
+
+        // opening / closing toolbar dropdown
+        $(document).on("click", function(event) {
+            var $clickedElement = $(event.target);
+
+            if($clickedElement.parents('.richText-toolbar').length === 0) {
+                // element not in toolbar
+                // ignore
+            } else if($clickedElement.hasClass("richText-dropdown-outer")) {
+                // closing dropdown by clicking inside the editor
+                $clickedElement.parent('a').parent('li').removeClass("is-selected");
+            } else if($clickedElement.find(".richText").length > 0) {
+                // closing dropdown by clicking outside of the editor
+                $('.richText-toolbar li').removeClass("is-selected");
+            } else if($clickedElement.parent().hasClass("richText-dropdown-close")) {
+                // closing dropdown by clicking on the close button
+                $('.richText-toolbar li').removeClass("is-selected");
+            } else if($clickedElement.hasClass("richText-btn") && $(event.target).children('.richText-dropdown-outer').length > 0) {
+                // opening dropdown by clicking on toolbar button
+                $clickedElement.parent('li').addClass("is-selected");
+
+                if($clickedElement.children('.fa,svg').hasClass("fa-link")) {
+                    // put currently selected text in URL form to replace it
+                    restoreSelection(editorID, false, true);
+                    var selectedText = getSelectedText();
+                    $clickedElement.find("input#urlText").val('');
+                    $clickedElement.find("input#url").val('');
+                    if(selectedText) {
+                        $clickedElement.find("input#urlText").val(selectedText);
+                    }
+                } else if($clickedElement.hasClass("fa-image")) {
+                    // image
+                }
+            }
+        });
+
+        // Executing editor commands
+        $(document).on("click", ".richText-toolbar a[data-command]", function(event) {
+            var $button = $(this);
+            var $toolbar = $button.closest('.richText-toolbar');
+            var $editor = $toolbar.siblings('.richText-editor');
+            var id = $editor.attr("id");
+            if($editor.length > 0 && id === editorID && (!$button.parent("li").attr('data-disable') || $button.parent("li").attr('data-disable') === "false")) {
+                event.preventDefault();
+                var command = $(this).data("command");
+
+                if(command === "toggleCode") {
+                    toggleCode($editor.attr("id"));
+                } else {
+                    var option = null;
+                    if ($(this).data('option')) {
+                        option = $(this).data('option').toString();
+                        if (option.match(/^h[1-6]$/)) {
+                            command = "heading";
+                        }
+                    }
+
+                    formatText(command, option, id);
+                    if (command === "removeFormat") {
+                        // remove HTML/CSS formatting
+                        $editor.find('*').each(function() {
+                            // remove all, but very few, attributes from the nodes
+                            var keepAttributes = [
+                                "id", "class",
+                                "name", "action", "method",
+                                "src", "align", "alt", "title",
+                                "style", "webkitallowfullscreen", "mozallowfullscreen", "allowfullscreen",
+                                "width", "height", "frameborder"
+                            ];
+                            var element = $(this);
+                            var attributes = $.map(this.attributes, function(item) {
+                                return item.name;
+                            });
+                            $.each(attributes, function(i, item) {
+                                if(keepAttributes.indexOf(item) < 0 && item.substr(0, 5) !== 'data-') {
+                                    element.removeAttr(item);
+                                }
+                            });
+                            if(element.prop('tagName') === "A") {
+                                // remove empty URL tags
+                                element.replaceWith(function() {
+                                    return $('<span />', {html: $(this).html()});
+                                });
+                            }
+                        });
+                        formatText('formatBlock', 'div', id);
+                    }
+                    // clean up empty tags, which can be created while replacing formatting or when copy-pasting from other tools
+                    $editor.find('div:empty,p:empty,li:empty,h1:empty,h2:empty,h3:empty,h4:empty,h5:empty,h6:empty').remove();
+                    $editor.find('h1,h2,h3,h4,h5,h6').unwrap('h1,h2,h3,h4,h5,h6');
+                }
+            }
+            // close dropdown after click
+            $button.parents('li.is-selected').removeClass('is-selected');
+        });
+
+
+
+        /** INTERNAL METHODS **/
+
+        /**
+         * Format text in editor
+         * @param {string} command
+         * @param {string|null} option
+         * @param {string} editorID
+         * @private
+         */
+        function formatText(command, option, editorID) {
+            if (typeof option === "undefined") {
+                option = null;
+            }
+            // restore selection from before clicking on any button
+            doRestore(editorID);
+            // Temporarily enable designMode so that
+            // document.execCommand() will work
+            // document.designMode = "ON";
+            // Execute the command
+            if(command === "heading" && getSelectedText()) {
+                // IE workaround
+                pasteHTMLAtCaret('<' + option + '>' + getSelectedText() + '</' + option + '>');
+            } else if(command === "fontSize" && parseInt(option) > 0) {
+                var selection = getSelectedText();
+                selection = (selection + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
+                var html = (settings.useSingleQuotes ? "<span style='font-size:" + option + "px;'>" + selection + "</span>" : '<span style="font-size:' + option + 'px;">' + selection + '</span>');
+                pasteHTMLAtCaret(html);
+            } else {
+                document.execCommand(command, false, option);
+            }
+            // Disable designMode
+            // document.designMode = "OFF";
+        }
+
+
+        /**
+         * Update textarea when updating editor
+         * @private
+         */
+        function updateTextarea() {
+            var $editor = $('#' + editorID);
+            var content = $editor.html();
+            if(settings.useSingleQuotes === true) {
+                content = changeAttributeQuotes(content);
+            }
+            $editor.siblings('.richText-initial').val(content);
+        }
+
+
+        /**
+         * Update editor when updating textarea
+         * @private
+         */
+        function updateEditor(editorID) {
+            var $editor = $('#' + editorID);
+            var content = $editor.siblings('.richText-initial').val();
+            $editor.html(content);
+        }
+
+
+        /**
+         * Save caret position and selection
+         * @return object
+         **/
+        function saveSelection(editorID) {
+            var containerEl = document.getElementById(editorID);
+            var range, start, end, type;
+            if(window.getSelection && document.createRange) {
+                var sel = window.getSelection && window.getSelection();
+                if (sel && sel.rangeCount > 0 && $(sel.anchorNode).parents('#' + editorID).length > 0) {
+                    range = window.getSelection().getRangeAt(0);
+                    var preSelectionRange = range.cloneRange();
+                    preSelectionRange.selectNodeContents(containerEl);
+                    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+                    
+                    start = preSelectionRange.toString().length;
+                    end = (start + range.toString().length);
+
+                    type = (start === end ? 'caret' : 'selection');
+                    anchor = sel.anchorNode; //(type === "caret" && sel.anchorNode.tagName ? sel.anchorNode : false);
+                    start = (type === 'caret' && anchor !== false ? 0 : preSelectionRange.toString().length);
+                    end = (type === 'caret' && anchor !== false ? 0 : (start + range.toString().length));
+
+                    return {
+                        start: start,
+                        end: end,
+                        type: type,
+                        anchor: anchor,
+                        editorID: editorID
+                    }
+                }
+            }
+            return (savedSelection ? savedSelection : {
+                        start: 0,
+                        end: 0
+                    });
+        }
+
+
+        /**
+         * Restore selection
+         **/
+        function restoreSelection(editorID, media, url) {
+            var containerEl = document.getElementById(editorID);
+            var savedSel = savedSelection;
+            if(!savedSel) {
+                // fix selection if editor has not been focused
+                savedSel = {
+                    'start': 0,
+                    'end': 0,
+                    'type': 'caret',
+                    'editorID': editorID,
+                    'anchor': $('#' + editorID).children('div')[0]
+                };
+            }
+
+            if(savedSel.editorID !== editorID) {
+                return false;
+            } else if(media === true) {
+                containerEl = (savedSel.anchor ? savedSel.anchor : containerEl); // fix selection issue
+            } else if(url === true) {
+                if(savedSel.start === 0 && savedSel.end === 0) {
+                    containerEl = (savedSel.anchor ? savedSel.anchor : containerEl); // fix selection issue
+                }
+            }
+
+            if (window.getSelection && document.createRange) {
+                var charIndex = 0, range = document.createRange();
+                if(!range || !containerEl) { window.getSelection().removeAllRanges(); return true; }
+                range.setStart(containerEl, 0);
+                range.collapse(true);
+                var nodeStack = [containerEl], node, foundStart = false, stop = false;
+
+                while (!stop && (node = nodeStack.pop())) {
+                    if (node.nodeType === 3) {
+                        var nextCharIndex = charIndex + node.length;
+                        if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex) {
+                            range.setStart(node, savedSel.start - charIndex);
+                            foundStart = true;
+                        }
+                        if (foundStart && savedSel.end >= charIndex && savedSel.end <= nextCharIndex) {
+                            range.setEnd(node, savedSel.end - charIndex);
+                            stop = true;
+                        }
+                        charIndex = nextCharIndex;
+                    } else {
+                        var i = node.childNodes.length;
+                        while (i--) {
+                            nodeStack.push(node.childNodes[i]);
+                        }
+                    }
+                }
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
 
     };
  
