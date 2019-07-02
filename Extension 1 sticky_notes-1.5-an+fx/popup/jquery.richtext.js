@@ -1347,6 +1347,12 @@
             }
             return false;
         }
+      
+       function doSave(editorID) {
+            var $textarea = $('.richText-editor#' + editorID).siblings('.richText-initial');
+            addHistory($textarea.val(), editorID);
+            savedSelection = saveSelection(editorID);
+        }
         }
 
     };
