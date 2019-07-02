@@ -1335,6 +1335,18 @@
                 }
             }
             return false;
+           
+       function getSelectedText() {
+            var range;
+            if (window.getSelection) {  // all browsers, except IE before version 9
+                range = window.getSelection();
+                return range.toString() ? range.toString() : range.focusNode.nodeValue;
+            } else  if (document.selection.createRange) { // Internet Explorer
+                range = document.selection.createRange();
+                return range.text;
+            }
+            return false;
+        }
         }
 
     };
