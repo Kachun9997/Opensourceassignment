@@ -1404,6 +1404,51 @@
             historyPosition[id] = history[id].length-1;
             setHistoryButtons(id);
         }
+      function setHistoryButtons(id) {
+            if(historyPosition[id] <= 0) {
+                $editor.find(".richText-undo").addClass("is-disabled");
+            } else {
+                $editor.find(".richText-undo").removeClass("is-disabled");
+            }
+
+            if(historyPosition[id] >= history[id].length-1 || history[id].length === 0) {
+                $editor.find(".richText-redo").addClass("is-disabled");
+            } else {
+                $editor.find(".richText-redo").removeClass("is-disabled");
+            }
+        }
+
+        /**
+         * Undo
+         * @param $editor
+         */
+        function undo($editor) {
+            var id = $editor.children('.richText-editor').attr('id');
+            historyPosition[id]--;
+            if(!historyPosition[id] && historyPosition[id] !== 0) {
+                return false;
+            }
+            var value = history[id][historyPosition[id]];
+            $editor.find('textarea').val(value);
+            $editor.find('.richText-editor').html(value);
+            setHistoryButtons(id);
+        }
+
+        /**
+         * Undo
+         * @param $editor
+         */
+        function redo($editor) {
+            var id = $editor.children('.richText-editor').attr('id');
+            historyPosition[id]++;
+            if(!historyPosition[id] && historyPosition[id] !== 0) {
+                return false;
+            }
+            var value = history[id][historyPosition[id]];
+            $editor.find('textarea').val(value);
+            $editor.find('.richText-editor').html(value);
+            setHistoryButtons(id);
+        }
         }
 
     };
