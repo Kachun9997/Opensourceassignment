@@ -1384,6 +1384,26 @@
             }
             return true;
         }
+      /**
+         * Add to history
+         * @param val Editor content
+         * @param id Editor ID
+         */
+        function addHistory(val, id) {
+            if(!history[id]) {
+                return false;
+            }
+            if(history[id].length-1 > historyPosition[id]) {
+                history[id].length = historyPosition[id] + 1;
+            }
+
+            if(history[id][history[id].length-1] !== val) {
+                history[id].push(val);
+            }
+
+            historyPosition[id] = history[id].length-1;
+            setHistoryButtons(id);
+        }
         }
 
     };
