@@ -1666,6 +1666,64 @@
                 field.focus();
             }
         }
+       /**
+         * Get video embed code from URL
+         * @param {string} url Video URL
+         * @param {string} size Size in the form of widthxheight
+         * @return {string|boolean}
+         * @private
+         **/
+        function getVideoCode(url, size) {
+            var video = getVideoID(url);
+            var responsive = false, success = false;
+
+            if(!video) {
+                // video URL not supported
+                return false;
+            }
+
+            if(!size) {
+                size = "640x360";
+                size = size.split("x");
+            } else if(size !== "responsive") {
+                size = size.split("x");
+            } else {
+                responsive = true;
+                size = "640x360";
+                size = size.split("x");
+            }
+
+            var html = '<br><br>';
+            if(responsive === true) {
+                html += '<div class="videoEmbed" style="position:relative;height:0;padding-bottom:56.25%">';
+            }
+            var allowfullscreen = 'webkitallowfullscreen mozallowfullscreen allowfullscreen';
+
+            if(video.platform === "YouTube") {
+                var youtubeDomain = (settings.youtubeCookies ? 'www.youtube.com' : 'www.youtube-nocookie.com');
+                html += '<iframe src="https://' + youtubeDomain + '/embed/' + video.id + '?ecver=2" width="' + size[0] + '" height="' + size[1] + '" frameborder="0"' + (responsive === true ? ' style="position:absolute;width:100%;height:100%;left:0"' : '') + ' ' + allowfullscreen + '></iframe>';
+                success = true;
+            } else if(video.platform === "Vimeo") {
+                html += '<iframe src="https://player.vimeo.com/video/' + video.id + '" width="' + size[0] + '" height="' + size[1] + '" frameborder="0"' + (responsive === true ? ' style="position:absolute;width:100%;height:100%;left:0"' : '') + ' ' + allowfullscreen + '></iframe>';
+                success = true;
+            } else if(video.platform === "Facebook") {
+                html += '<iframe src="https://www.facebook.com/plugins/video.php?href=' + encodeURI(url) + '&show_text=0&width=' + size[0] + '" width="' + size[0] + '" height="' + size[1] + '" style="' + (responsive === true ? 'position:absolute;width:100%;height:100%;left:0;border:none;overflow:hidden"' : 'border:none;overflow:hidden') + '" scrolling="no" frameborder="0" allowTransparency="true" ' + allowfullscreen + '></iframe>';
+                success = true;
+            } else if(video.platform === "Dailymotion") {
+                html += '<iframe frameborder="0" width="' + size[0] + '" height="' + size[1] + '" src="//www.dailymotion.com/embed/video/' + video.id + '"' + (responsive === true ? ' style="position:absolute;width:100%;height:100%;left:0"' : '') + ' ' + allowfullscreen + '></iframe>';
+                success = true;
+            }
+
+            if(responsive === true) {
+                html += '</div>';
+            }
+            html += '<br><br>';
+
+            if(success) {
+                return html;
+            }
+            return false;
+        }
         }
 
     };
