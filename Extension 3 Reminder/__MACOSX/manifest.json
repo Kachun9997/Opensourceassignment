@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Reminder",
+  "description": "This is a Reminder",
+  "version": "3.0",
+  "background": {
+    "scripts": ["scripts.js", "main.js"]
+  },
+  "icons": {
+    "48": "alarm.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "32": "alarm.png"
+    },
+    "default_popup": "index.html",
+    "default_title": "Reminder"
+  },
+  "permissions": ["notifications", "activeTab", "alarms"]
+}
