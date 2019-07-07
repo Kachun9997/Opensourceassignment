@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Remainder</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <style>
+        .inputs{
+        width: 200px;
+        display: block;
+        margin:0 auto;
+    }
+    .remainder{
+        display: block;
+        margin:0 auto;
+        margin-top: 10px;
+    }
+    body{
+        margin: 0;
+        padding: 0;
+        background: #fceabb;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #f8b500, #fceabb);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #f8b500, #fceabb); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    }
+    #submit{
+        margin-bottom: 5px;
+    }
+  .btn1{
+      width: 100px;
+      margin:5px;
+  }
+    </style>
+</head>
+
+<body id="color">
+    <div class="container">
+        <input type="text" class="remainder form-control" id="remainder" placeholder="Remainder..."><br>
+        <label for="hours">Hours:</label>
+        <input class="inputs form-control" type="number" id='hours' placeholder="Hour"><br>
+        <label for="minutes">Minutes:</label>
+        <input class="inputs form-control" type="number" id='minutes' placeholder="Min"><br>
+        <label for="seconds">Seconds:</label>
+        <input class="inputs form-control" type="number" id='seconds' placeholder="Sec"><br>
+        <button id="submit" class="btn btn-default btn-block">Submit</button>
+        <audio id="alarm">
+            <source src="alarm.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+    </div>
+
+    <script src="./scripts.js"></script>
+</body>
+
+
+
+</html>
