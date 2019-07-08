@@ -102,4 +102,4 @@ function SetReminders(hours, minutes, seconds, remainder1){
 				console.log(error);
 			}
 		);
-
+}
