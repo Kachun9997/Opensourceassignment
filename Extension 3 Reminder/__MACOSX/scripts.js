@@ -1,5 +1,7 @@
+
 var submit = document.getElementById("submit");
 
+LoadStorage();
 // var hello = () => {
 //   var hours = document.getElementById("hours").value;
 //   var minutes = document.getElementById("minutes").value;
@@ -63,4 +65,42 @@ submit.addEventListener("click", () => {
   document.getElementById("hours").value = "";
   document.getElementById("minutes").value = "";
   document.getElementById("seconds").value = "";
+  
+  
+  SetReminders(hours, minutes, seconds, remainder1);
 });
+
+function LoadStorage(){
+	let items = browser.storage.local.get();
+	items.then(
+		item => {
+			for(var keys in item){
+				console.log(item[keys]);
+			}
+		},
+		error => {
+			var data = {};
+			
+			browser.storage.local.set(data);
+		}
+	);
+}
+
+function SetReminders(hours, minutes, seconds, remainder1){
+	  var pids = Math.floor((Math.random() * 10000) + 1);
+	  var data = {hours, minutes, seconds, remainder1};
+	  
+	  let items = browser.storage.local.get();
+		items.then(
+			item => {
+				var r_data = item;
+				var pd  = "r_" + pids;
+				
+				browser.storage.local.set({ pd : data});
+			},
+			error => {
+				console.log(error);
+			}
+		);
+}
+
