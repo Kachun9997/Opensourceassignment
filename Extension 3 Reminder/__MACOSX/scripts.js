@@ -75,21 +75,10 @@ var str_join = remainder1 + ',r_' + pids.toString();
   SetReminders(hours, minutes, seconds, remainder1);
 });
 
-function LoadStorage(){
-	let items = browser.storage.local.get();
-	items.then(
-		item => {
-			for(var keys in item){
-				console.log(item[keys]);
-			}
-		},
-		error => {
-			var data = {};
-			
-			browser.storage.local.set(data);
-		}
-	);
-}
+function LoadStorage() {
+  const items = browser.storage.local.get('tsl_reminder');
+  items.then(res => {
+    const NewReminder = res.tsl_reminder;
 
 function SetReminders(hours, minutes, seconds, remainder1){
 	  var pids = Math.floor((Math.random() * 10000) + 1);
