@@ -267,7 +267,20 @@ var AterCalculator = (function () {
                     args.push(resultStack[j]);
                 }
 
-        
+        resultStack.length = resultStack.length - operator.operands;
+                resultStack.push(+operator.func.apply(this, args));
+                args.length = 0;
+            } else {
+                resultStack.push(typeof symbols[token] !== 'undefined' ? symbols[token] : +token);
+            }
+        }
+        if (resultStack.length !== 1) {
+            throw 'Too many values in the expression.';
+        }
+
+        return resultStack.pop();
+
+    };
 
     return Calculator;
 
