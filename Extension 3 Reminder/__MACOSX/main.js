@@ -14,3 +14,9 @@ browser.alarms.onAlarm.addListener(alarm => {
       title: 'Remainder',
       message: splitted[0]
     });
+    
+    const reminders = res.tsl_reminder;
+    delete reminders[splitted[1]];
+    browser.storage.local.set({ tsl_reminder: reminders });
+  });
+});
