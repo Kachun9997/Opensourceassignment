@@ -96,5 +96,12 @@ function SetReminders(pids, hours, minutes, seconds, remainder1) {
   var data = { hours, minutes, seconds, remainder1 };
 
   const items = browser.storage.local.get('tsl_reminder');
-	
+  items
+    .then(res => {
+      const reminder = res.tsl_reminder;
+      reminder['r_' + pids.toString()] = data;
+      browser.storage.local.set({
+        tsl_reminder: reminder
+      });
+    })
 }
