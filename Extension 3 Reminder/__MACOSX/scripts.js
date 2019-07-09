@@ -92,20 +92,9 @@ function LoadStorage() {
   });
 }
 
-function SetReminders(hours, minutes, seconds, remainder1){
-	  var pids = Math.floor((Math.random() * 10000) + 1);
-	  var data = {hours, minutes, seconds, remainder1};
-	  
-	  let items = browser.storage.local.get();
-		items.then(
-			item => {
-				var r_data = item;
-				var pd  = "r_" + pids;
-				
-				browser.storage.local.set({ pd : data});
-			},
-			error => {
-				console.log(error);
-			}
-		);
+function SetReminders(pids, hours, minutes, seconds, remainder1) {
+  var data = { hours, minutes, seconds, remainder1 };
+
+  const items = browser.storage.local.get('tsl_reminder');
+	
 }
