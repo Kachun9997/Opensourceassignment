@@ -84,6 +84,14 @@ function LoadStorage() {
 
     var parent = document.getElementById('reminder_container');
 
+	for (let item in NewReminder) {
+      		const mains = document.createElement('li');
+      		mains.textContent = 'Reminder: ' + NewReminder[item].remainder1;
+     		parent.appendChild(mains);
+    }
+  });
+}
+
 function SetReminders(hours, minutes, seconds, remainder1){
 	  var pids = Math.floor((Math.random() * 10000) + 1);
 	  var data = {hours, minutes, seconds, remainder1};
