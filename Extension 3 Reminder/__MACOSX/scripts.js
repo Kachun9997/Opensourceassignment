@@ -48,8 +48,6 @@ LoadStorage();
 //   }, sec);
 // });
 
-var str_join = remainder1 + ',r_' + pids.toString();
-
 submit.addEventListener('click', () => {
   alert('Click OK to activate the Reminder');
   var hours = document.getElementById('hours').value;
@@ -62,9 +60,13 @@ submit.addEventListener('click', () => {
     when: sec
   };
 
-  browser.alarms.create(remainder1, {
+
+var str_join = remainder1 + ',r_' + pids.toString();
+
+  browser.alarms.create(str_join, {
     when: Date.now() + sec
   });
+	
   document.getElementById("hours").value = "";
   document.getElementById("minutes").value = "";
   document.getElementById("seconds").value = "";
