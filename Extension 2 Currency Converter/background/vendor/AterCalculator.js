@@ -256,6 +256,16 @@ var AterCalculator = (function () {
             length,
             j,
             l;
+        
+        for (i = 0, length = tokens.length; i < length; i++) {
+            token = tokens[i];
+            if (typeof (operator = operators[token] || functions[token]) !== 'undefined') {
+                if (resultStack.length < operator.operands) {
+                    throw 'Insufficient values in the expression.';
+                }
+                for (l = resultStack.length, j = l - operator.operands; j < l; j++) {
+                    args.push(resultStack[j]);
+                }
 
         
 
