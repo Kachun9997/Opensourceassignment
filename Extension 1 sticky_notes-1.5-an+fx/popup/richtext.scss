@@ -256,6 +256,25 @@ $highlight: #3498db;
         min-height: 400px;
         height: 400px;
     }
+    .richText-help {
+        float: right;
+        display: block;
+        padding: 10px 15px;
+        cursor: pointer;
+    }
+
+    .richText-undo,
+    .richText-redo {
+        float: left;
+        display: block;
+        padding: 10px 15px;
+        border-right: #EFEFEF solid 1px;
+        cursor: pointer;
+    }
+    .richText-undo.is-disabled,
+    .richText-redo.is-disabled {
+        opacity: 0.4;
+    }
 
   
     }
