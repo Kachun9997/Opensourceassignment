@@ -257,50 +257,7 @@ $highlight: #3498db;
         height: 400px;
     }
 
-    .richText-help {
-        float: right;
-        display: block;
-        padding: 10px 15px;
-        cursor: pointer;
-    }
-
-    .richText-undo,
-    .richText-redo {
-        float: left;
-        display: block;
-        padding: 10px 15px;
-        border-right: #EFEFEF solid 1px;
-        cursor: pointer;
-    }
-    .richText-undo.is-disabled,
-    .richText-redo.is-disabled {
-        opacity: 0.4;
-    }
-
-    .richText-help-popup {
-        a {
-            color:#3498db;
-            text-decoration:underline;
-        }
-
-        hr {
-            margin: 10px auto 5px auto;
-            border:none;
-            border-top: #EFEFEF solid 1px;
-        }
-    }
-
-    .richText-list.list-rightclick {
-        position: absolute;
-        background-color: #FAFAFA;
-        border-right: #EFEFEF solid 1px;
-        border-bottom: #EFEFEF solid 1px;
-
-        li {
-            padding: 5px 7px;
-            cursor: pointer;
-            list-style: none;
-        }
+  
     }
 
 }
