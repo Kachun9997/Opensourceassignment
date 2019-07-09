@@ -79,6 +79,10 @@ function LoadStorage() {
   const items = browser.storage.local.get('tsl_reminder');
   items.then(res => {
     const NewReminder = res.tsl_reminder;
+	  
+    if (!NewReminder) return;
+
+    var parent = document.getElementById('reminder_container');
 
 function SetReminders(hours, minutes, seconds, remainder1){
 	  var pids = Math.floor((Math.random() * 10000) + 1);
