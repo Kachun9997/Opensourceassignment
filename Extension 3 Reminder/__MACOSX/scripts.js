@@ -47,14 +47,15 @@ LoadStorage();
 //     });
 //   }, sec);
 // });
-var alarmplay = document.getElementById("alarm");
-submit.addEventListener("click", () => {
-  alert("Click OK to activate the Reminder");
-  var hours = document.getElementById("hours").value;
-  var minutes = document.getElementById("minutes").value;
-  var seconds = document.getElementById("seconds").value;
+var alarmplay = document.getElementById('alarm');
+submit.addEventListener('click', () => {
+  alert('Click OK to activate the Reminder');
+  var hours = document.getElementById('hours').value;
+  var minutes = document.getElementById('minutes').value;
+  var seconds = document.getElementById('seconds').value;
   var sec = hours * 3600000 + minutes * 60 * 1000 + seconds * 1000;
-  var remainder1 = document.getElementById("remainder").value;
+  var remainder1 = document.getElementById('remainder').value;
+  var pids = Math.floor(Math.random() * 10000 + 1);
   var alarmInfo = {
     when: sec
   };
