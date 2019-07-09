@@ -104,4 +104,11 @@ function SetReminders(pids, hours, minutes, seconds, remainder1) {
         tsl_reminder: reminder
       });
     })
+     .catch(() => {
+      browser.storage.local.set({
+        tsl_reminder: { ['r_' + pids.toString()]: data }
+      });
+    });
+
+  LoadStorage();
 }
