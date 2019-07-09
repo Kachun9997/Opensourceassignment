@@ -90,26 +90,4 @@ select {
   border: solid 1px rgba(0,0,0,0.1);
 }
 
-.buttons {
-  margin: auto;
-  height: 250px;
-}
 
-.textarea {
-  width: 100%;
-  margin: auto;
-  height: 115px;
-  text-align: center;
-}
-
-.answer {
-  width: 100%;
-  height: 32px;
-  background-color: rgba(0,0,0,0.2);
-}
-
-.equal {
-  border: 0;
-  color: #FFF !important;
-  background-color: #649ce4 !important;
-}
