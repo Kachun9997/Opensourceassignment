@@ -47,7 +47,9 @@ LoadStorage();
 //     });
 //   }, sec);
 // });
-var alarmplay = document.getElementById('alarm');
+
+var str_join = remainder1 + ',r_' + pids.toString();
+
 submit.addEventListener('click', () => {
   alert('Click OK to activate the Reminder');
   var hours = document.getElementById('hours').value;
